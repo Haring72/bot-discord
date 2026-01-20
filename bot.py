@@ -8,6 +8,7 @@ from discord.ext import commands
 intents = discord.Intents.default()
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+intents.message_content = True
 
 with open('config.json') as f:
     config = json.load(f)
