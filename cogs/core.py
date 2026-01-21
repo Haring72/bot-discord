@@ -18,17 +18,8 @@ class CoreCog(commands.Cog):
             )
             embed.set_thumbnail(url=member.avatar.url)
             await welcome_channel.send(embed=embed)
-    
-    @commands.command(name='help')
-    async def help_command(self, ctx):
-        embed = discord.Embed(
-            title="Comandos disponibles",
-            description="Aquí tienes una lista de comandos que puedes usar:",
-            color=discord.Color.red()
-        )
-        pass
         
 
-        
+
 async def setup(bot):
     await bot.add_cog(CoreCog(bot))
