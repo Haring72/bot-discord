@@ -53,7 +53,8 @@ class StreamCog(commands.Cog):
                     return False
                 
                 headers = {
-                    'Client-ID': self.config['twitch_app_credentials']['client_id']
+                    'Client-ID': self.config['twitch_app_credentials']['client_id'],
+                    'Authorization': self.twitch_token
                 }
 
                 async with session.get('https://api.twitch.tv/helix/users', headers = headers, params = {'login': username}) as resp:
