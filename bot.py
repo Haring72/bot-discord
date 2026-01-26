@@ -1,41 +1,42 @@
 import os
 import discord
 import json
+import asyncio
 from discord.ext import commands
 
 
 
 intents = discord.Intents.default()
-
-bot = commands.Bot(command_prefix='!', intents=intents)
 intents.message_content = True
 
-with open('config.json') as f:
-    config = json.load(f)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-@bot.event
+def load_config():
+    try:
+        with open('config.json') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("Config.json file can not be found. Please, create one first")
+        exit(1)
+    except json.JSONDecodeError:
+        print("This config.json is not valid, check documentation for more help")
+        exit(1)
+
+config = load_config()
+
 async def load_cogs():
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             await bot.load_extension(f'cogs.{filename[:-3]}')
 
-@bot.remove_command('help') # This requires more testing
-
-@bot.command(name = 'help')
-async def custom_help_command(ctx):
-    help_message = "Estos son los comandos disponibles:\n"
-
-    for command in bot.commands:
-        help_message += f"!{command.name}: {command.help}\n"
-    
-    await ctx.send(help_message)
-    
-
-
+@bot.event
 async def on_ready():
     print(f'Bot started as {bot.user}')
 
-import asyncio
+@bot.remove_command('help') # This requires more testing
+    
+
+
 async def main():
     await load_cogs()
     print(f'Cogs loaded successfully.')
