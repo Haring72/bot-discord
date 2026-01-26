@@ -19,9 +19,7 @@ async def load_cogs():
         if filename.endswith('.py'):
             await bot.load_extension(f'cogs.{filename[:-3]}')
 
-@bot.event
-
-### @bot.remove_command('help') # This requires more testing
+@bot.remove_command('help') # This requires more testing
 
 @bot.command(name = 'help')
 async def custom_help_command(ctx):
