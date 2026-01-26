@@ -9,8 +9,8 @@ class StreamCog(commands.Cog):
         self.bot = bot
         self.config = self.load_config()
         self.twitch_token = None
-        self.channels = {} # {guild_id: {'channel_id': twitch_username}}
-        self.stream_states = {} # {guild_id: {channel_id: bool}}
+        self.channels = {}
+        self.stream_states = {}
         self.check_twitch_streams.start()
     
     def load_config(self):
@@ -20,7 +20,7 @@ class StreamCog(commands.Cog):
     def cog_unload(self):
         self.check_twitch_streams.cancel()
     
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes = 5)
     async def check_twitch_streams(self):
         if not self.twitch_token:
             await self.get_twitch_token()
@@ -64,8 +64,8 @@ class StreamCog(commands.Cog):
                     return False
         except:
             return False
-    
-    @commands.command(name = 'track')
+
+    @commands.command(name = 'twitch-track', help = 'Track a Twitch user\'s stream', usage = '!twitch-track <twitch_username> #[discord_text_channel]')
     @commands.has_permissions(manage_guild = True)
     async def trackTwitch(self, ctx, twitch_username: str, discord_channel: discord.TextChannel = None):
         twitch_username = twitch_username.lower().strip()
@@ -119,12 +119,14 @@ class StreamCog(commands.Cog):
 
         async with session.get('https://api.twitch.tv/helix/users', headers = headers, params = {'login': username}) as resp:
             user_data = await resp.json()
+            
             if not user_data['data']:
                 return None
             user_id = user_data['data'][0]['id']
 
         async with session.get('https://api.twitch.tv/helix/streams', headers = headers, params = {'user_id': user_id}) as resp:
             stream_data = await resp.json()
+
             if stream_data.get('data'):
                 stream = stream_data['data'][0]
                 return {
