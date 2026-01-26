@@ -32,12 +32,11 @@ async def load_cogs():
 @bot.event
 async def on_ready():
     print(f'Bot started as {bot.user}')
-
-@bot.remove_command('help') # This requires more testing
     
 
 
 async def main():
+    bot.remove_command('help')
     await load_cogs()
     print(f'Cogs loaded successfully.')
     await bot.start(config['token'])
