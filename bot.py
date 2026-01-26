@@ -21,6 +21,19 @@ async def load_cogs():
 
 @bot.event
 
+### @bot.remove_command('help') # This requires more testing
+
+@bot.command(name = 'help')
+async def custom_help_command(ctx):
+    help_message = "Estos son los comandos disponibles:\n"
+
+    for command in bot.commands:
+        help_message += f"!{command.name}: {command.help}\n"
+    
+    await ctx.send(help_message)
+    
+
+
 async def on_ready():
     print(f'Bot started as {bot.user}')
 
