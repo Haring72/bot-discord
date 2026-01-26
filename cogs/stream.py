@@ -46,19 +46,50 @@ class StreamCog(commands.Cog):
                     elif not is_live and self.stream_states.get(state_key, False):
                         self.stream_states[state_key] = False
     
-    @commands.command()
+    async def verifyTwitchUser(self, username):
+        try:
+            async with aiohttp.ClientSession() as session:
+                if not self.config:
+                    return False
+                
+                headers = {
+                    'Client-ID': self.config['twitch_app_credentials']['client_id']
+                }
+
+                async with session.get('https://api.twitch.tv/helix/users', headers = headers, params = {'login': username}) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        return bool(data.get('data'))
+                    return False
+        except:
+            return False
+    
+    @commands.command(name = 'track')
     @commands.has_permissions(manage_guild = True)
     async def trackTwitch(self, ctx, twitch_username: str, discord_channel: discord.TextChannel = None):
+        twitch_username = twitch_username.lower().strip()
+
+        if not await self.verifyTwitchUser(twitch_username):
+            embed = discord.Embed(
+                title = "Usuario no encontrado / Usuario no válido",
+                description = f"No se ha encontrado al usuario **{twitch_username}** en Twitch. Verifica que se ha escrito correctamente o, si crees que es un error, contacta con un administrador",
+                color = discord.Color.red()
+            )
+            
+            await ctx.send(embed = embed)
+            return
+        
         if discord_channel is None:
             discord_channel = ctx.channel
+
         if ctx.guild.id not in self.channels:
             self.channels[ctx.guild.id] = {}
         
-        self.channels[ctx.guild.id][discord_channel.id] = twitch_username.lower()
+        self.channels[ctx.guild.id][discord_channel.id] = twitch_username
         self.stream_states[(ctx.guild.id, discord_channel.id)] = False
 
         embed = discord.Embed(
-            title="Twitch Tracking",
+            title="Twitch Tracking Correcto",
             description=f"Se notificarán los streams de **{twitch_username}** en {discord_channel.mention}",
             color=discord.Color.red()
         )
