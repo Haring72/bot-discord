@@ -29,7 +29,7 @@ class Core(commands.Cog):
         for command in self.bot.commands:
             if command.help:
                 usage = f"`{command.usage}`" if command.usage else "No usage provided"
-                embed.add_field(name = f"!{command.name}", value = f"{command.help}\n**Uso: **{usage}", inline = False)
+                embed.add_field(name = f"--- !{command.name}", value = f"{command.help}\n**Uso: **{usage}", inline = False)
             
         await ctx.send(embed = embed)
 
