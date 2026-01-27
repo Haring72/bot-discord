@@ -4,45 +4,65 @@ import json
 from discord.ext import commands
 from datetime import datetime, timedelta
 
-class Core(commands.Cog):
-    def __init__ (self, bot):
-        self.bot = bot
-        self.xp_file = "cog_data/users_xp.json"
-        self.cooldown = {}
-        self.load_xp_data()
+
+
+XP_FILE = "cog_data/users_xp.json"
+XP_COOLDOWN_SECONDS = 30
+XP_PER_MESSAGE = 10
+XP_PER_LEVEL = 100
+
+
+
+class XPManager:
+    def __init__(self, xp_file: str = XP_FILE):
+        self.xp_file = xp_file
+        self._ensure_file_exists()
     
-    def load_xp_data(self):
-        if not os.path.exists("cog_data"):
-            os.makedirs("cog_data")
+    def _ensure_file_exists(self):
+        os.makedirs(os.path.dirname(self.xp_file), exist_ok = True)
         if not os.path.exists(self.xp_file):
             with open(self.xp_file, 'w') as f:
                 json.dump({}, f)
-
-    def get_xp_data(self):
+    
+    def get_data(self) -> dict:
         with open(self.xp_file, 'r') as f:
             return json.load(f)
-
-    def save_xp_data(self, data): 
+    
+    def save_data(self, data: dict):
         with open(self.xp_file, 'w') as f:
             json.dump(data, f, indent = 4)
     
-    def add_xp(self, user_id, xp_amount):
-        data = self.get_xp_data()
+    def calculate_level_up(self, current_level: int) -> int:
+        return current_level * XP_PER_LEVEL
+    
+    def add_xp(self, user_id: int, xp_amount: int) -> dict:
+        data = self.get_data()
         user_id_str = str(user_id)
 
         if user_id_str not in data:
             data[user_id_str] = {"xp": 0, "level": 1}
-
+        
         data[user_id_str]["xp"] += xp_amount
-
-        xp_needed = data[user_id_str]["level"] * 100
+        xp_needed = self.calculate_level_up(data[user_id_str]["level"])
 
         if data[user_id_str]["xp"] >= xp_needed:
             data[user_id_str]["level"] += 1
             data[user_id_str]["xp"] = 0
         
-        self.save_xp_data(data)
+        self.save_data(data)
         return data[user_id_str]
+    
+    def get_user_data(self, user_id: int) -> dict:
+        data = self.get_data()
+        return data.get(str(user_id), {"xp": 0, "level": 1})
+    
+
+
+class Core(commands.Cog):
+    def __init__ (self, bot):
+        self.bot = bot
+        self.xp_manager = XPManager()
+        self.cooldown = {}
     
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -52,12 +72,11 @@ class Core(commands.Cog):
         user_id = message.author.id
         now = datetime.now()
 
-        if user_id in self.cooldown:
-            if now < self.cooldown[user_id]:
-                return
+        if user_id in self.cooldown and now < self.cooldown[user_id]:
+            return
         
-        self.cooldown[user_id] = now + timedelta(seconds = 30)
-        self.add_xp(user_id, 10)
+        self.cooldown[user_id] = now + timedelta(seconds = XP_COOLDOWN_SECONDS)
+        self.xp_manager.add_xp(user_id, XP_PER_MESSAGE)
     
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -90,8 +109,7 @@ class Core(commands.Cog):
     @commands.command(name = 'level', help = 'Check your current level and XP', usage = '!level [@member]')
     async def level_command(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        data = self.get_xp_data()
-        user_data = data.get(str(member.id), {"xp": 0, "level": 1})
+        user_data = self.xp_manager.get_user_data(member.id)
 
         embed = discord.Embed(
             title = f"Nivel de {member.name}",
