@@ -3,10 +3,10 @@
 A simple Discord bot built with discord.py, featuring modular cogs for easy extension and maintenance.
 
 ## Features
-- Custom welcome message for new members
-- Modular command and event handling using cogs
-- Example custom help command
-- Easy to extend with new commands and cogs
+- Custom welcome message embed for new members
+- Custom help command
+- Level up function per user
+- Stream tracker (only Twitch at this moment)
 
 ## Project Structure
 ```
@@ -15,7 +15,7 @@ bot.py            # Main bot entry point and setup
 env/              # Virtual environment files included, so there is no need to create another
 
 cogs/             # Folder for modular bot features (cogs)
-  core.py         # Core features
+  core.py         # Core features (may create new files)
   moderation.py   # Moderation commands
   stream.py       # Stream-related commands
   test.py         # Test commands
@@ -52,14 +52,19 @@ README.md         # Project documentation (this file)
       ```
       python3 -m pip install -U discord.py
       ```
-4. **Configure your bot**
-   - Create a `config.json` file with your bot token:
+4. **Create the bot app** ([This page](https://discordpy.readthedocs.io/en/stable/discord.html) offers all the information you may need about this. Will be updated if needed specific steps)
+5. **Configure your bot**
+   - Create a `config.json` file with your bot token (only "token" is the must have, write the others for extented functionality):
      ```json
      {
-       "token": "YOUR_BOT_TOKEN"
+       "token": "YOUR_BOT_TOKEN",
+       "twitch_app_credentials": {
+            "client_id": "TWITCH_APP_CLIENT_ID",
+            "client_secret": "TWITCH_APP_CLIENT_SECRET"
+       }
      }
      ```
-5. **Run the bot**
+6. **Run the bot**
    ```powershell
    python bot.py
    ```
