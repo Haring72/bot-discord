@@ -35,7 +35,7 @@ README.md         # Project documentation (this file)
      .\env\Scripts\Activate.ps1
      pip install -r requirements.txt
      ```
-   - **Windows (Command Prompt):**
+   - **Windows (CMD):**
      ```cmd
      python -m venv env
      .\env\Scripts\activate.bat
@@ -53,7 +53,7 @@ README.md         # Project documentation (this file)
      ```powershell
      .\env\Scripts\Activate.ps1
      ```
-   - **Windows (Command Prompt):**
+   - **Windows (CMD):**
      ```cmd
      .\env\Scripts\activate.bat
      ```
@@ -62,7 +62,7 @@ README.md         # Project documentation (this file)
      source env/bin/activate
      ```
 
-**WARNING:** Virtual environment activation in Windows may fail because of the script execution policy the system has, so you may write this command in PowerShell (only once):
+**WARNING:** Virtual environment activation in Windows may fail because of the script execution policy the system has, so you may write this command in PowerShell if you get the "script disabled" error (only once):
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
@@ -70,8 +70,9 @@ However, this is almost a security compromise, because you are allowing scripts 
 \
 **I will not be responsible for any damage done after writing that command**
 
-\
+
 4. **Create the bot app** ([This page](https://discordpy.readthedocs.io/en/stable/discord.html) offers all the information you may need about this. Will be updated if needed specific steps)
+
 5. **Configure your bot**
    - Create a `config.json` file with your bot token (only "token" is the must have, write the others for extented functionality):
      ```json
