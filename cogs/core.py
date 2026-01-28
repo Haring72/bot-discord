@@ -84,32 +84,33 @@ class Core(commands.Cog):
     
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        try:
-            config = load_config()
-            welcome_channel_id = config.get("welcome_channel_id")
+        config = load_config()
+        welcome_channel_id = config.get("welcome_channel_id")
 
-            if not welcome_channel_id:
-                print("Welcome channel ID not set in config.json, please set it to enable welcome messages")
-                return
-            
-            welcome_channel = member.guild.get_channel(welcome_channel_id)
+        if not welcome_channel_id:
+            print("Welcome channel ID not set in config.json, please set it to enable welcome messages")
+            return
+        
+        welcome_channel = member.guild.get_channel(welcome_channel_id)
 
-            if not welcome_channel:
-                print(f"Welcome channel ID ({welcome_channel_id}) was not found, please check config.json and ensure the ID is correct")
-                return
-            
-            thumbnail_url = member.avatar.url if member.avatar else member.default_avatar.url
+        if not welcome_channel:
+            print(f"Welcome channel ID ({welcome_channel_id}) was not found, please check config.json and ensure the ID is correct")
+            return
+        
+        thumbnail_url = member.avatar.url if member.avatar else member.default_avatar.url
 
-            embed = discord.Embed(
-                title = "Bienvenido!",
-                description = f"Hola {member.mention}, bienvenido a este servidor",
-                color = discord.Color.red()
-            )
-            embed.set_thumbnail(url = thumbnail_url)
-
-            await welcome_channel.send(embed = embed)
-        except Exception as e:
-            print(f"Error in on_member_join: {e}")
+        embed = discord.Embed(
+            title = f"{member.mention} se ha unido :D",
+            description = f"🎊 Nos alegra tenerte por aquí! 🎉",
+            color = discord.Color.red()
+        )
+        embed.add_field(name = "📊 Miembros totales: ", value = f"{member.guild.member_count}", inline = True)
+        embed.add_field(name = "📅 Fecha de unión: ", value = f"<t:{int(member.joined_at.timestamp())}:R>", inline = True)
+        embed.set_thumbnail(url = thumbnail_url)
+        embed.set_footer(text = "Espero que disfrutes tu tiempo con nosotros :D")
+        embed.timestamp = datetime.now()
+        
+        await welcome_channel.send(embed = embed)
 
     @commands.command(name = 'help', help = 'Show this help message', usage = '!help')
     async def custom_help_command(self, ctx):
