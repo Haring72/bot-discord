@@ -67,7 +67,7 @@ README.md         # Project documentation (this file)
      ```json
      {
        "token": "YOUR_BOT_TOKEN",
-       "welcome_channel_id": 1234567890123456789
+       "welcome_channel_id": 1234567890123456789,
        "twitch_app_credentials": {
             "client_id": "TWITCH_APP_CLIENT_ID",
             "client_secret": "TWITCH_APP_CLIENT_SECRET"
