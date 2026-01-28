@@ -89,6 +89,7 @@ However, this is almost a security compromise, because you are allowing scripts 
    ```powershell
    python bot.py
    ```
+   **On every execution you will need to activate the virtual environment first**, in Linux you can avoid that with the `./start_bot.sh` command, I'm working on a similar script for Windows.
 
 ## Aditional documentation
 Code writen using this sites
