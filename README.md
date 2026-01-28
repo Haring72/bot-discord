@@ -61,6 +61,16 @@ README.md         # Project documentation (this file)
      ```bash
      source env/bin/activate
      ```
+
+**WARNING:** Virtual environment activation in Windows may fail because of the script execution policy the system has, so you may write this command in PowerShell (only once):
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+However, this is almost a security compromise, because you are allowing scripts to be executed in your system. If you write this, please be careful with what you execute from now on.\
+\
+**I will not be responsible for any damage done after writing that command**
+
+\
 4. **Create the bot app** ([This page](https://discordpy.readthedocs.io/en/stable/discord.html) offers all the information you may need about this. Will be updated if needed specific steps)
 5. **Configure your bot**
    - Create a `config.json` file with your bot token (only "token" is the must have, write the others for extented functionality):
