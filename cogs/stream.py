@@ -50,7 +50,7 @@ class StreamCog(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes = 10)
     async def check_twitch_streams(self):
         if not self.twitch_token:
             await self.get_twitch_token()
