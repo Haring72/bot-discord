@@ -12,7 +12,7 @@ A simple Discord bot built with discord.py, featuring modular cogs for easy exte
 ```
 bot.py            # Main bot entry point and setup
 
-env/              # Virtual environment files included, so there is no need to create another
+env/              # Virtual environment files (regenerate using requirements.txt for cross-platform compatibility)
 
 cogs/             # Folder for modular bot features (cogs)
   core.py         # Core features (may create new files)
@@ -20,6 +20,7 @@ cogs/             # Folder for modular bot features (cogs)
   stream.py       # Stream-related commands
   test.py         # Test commands
 config.json       # Bot configuration (token, etc.)
+requirements.txt  # Project dependencies for easy virtual environment setup
 
 README.md         # Project documentation (this file)
 ```
@@ -27,37 +28,46 @@ README.md         # Project documentation (this file)
 ## Getting Started
 1. **Clone the repository**
 
-2. **Activate a virtual environment** (created files are already included, so there is no need for creation, but commands are included just in case)
+2. **Regenerate the virtual environment** (recommended for cross-platform compatibility)
    - **Windows (PowerShell):**
      ```powershell
      python -m venv env
      .\env\Scripts\Activate.ps1
+     pip install -r requirements.txt
      ```
    - **Windows (Command Prompt):**
      ```cmd
      python -m venv env
      .\env\Scripts\activate.bat
+     pip install -r requirements.txt
      ```
    - **Linux/macOS:**
      ```bash
      python3 -m venv env
      source env/bin/activate
+     pip install -r requirements.txt
      ```
-3. **Install dependencies** (in case discord.py is not installed or virtual environment failed to be activated):
-    - **Windows (PowerShell)**
-      ```powershell
-      py -3 -m pip install -U discord.py
-      ```
-    - **Library from PyPl**
-      ```
-      python3 -m pip install -U discord.py
-      ```
+
+3. **Activate the virtual environment** (if not already activated)
+   - **Windows (PowerShell):**
+     ```powershell
+     .\env\Scripts\Activate.ps1
+     ```
+   - **Windows (Command Prompt):**
+     ```cmd
+     .\env\Scripts\activate.bat
+     ```
+   - **Linux/macOS:**
+     ```bash
+     source env/bin/activate
+     ```
 4. **Create the bot app** ([This page](https://discordpy.readthedocs.io/en/stable/discord.html) offers all the information you may need about this. Will be updated if needed specific steps)
 5. **Configure your bot**
    - Create a `config.json` file with your bot token (only "token" is the must have, write the others for extented functionality):
      ```json
      {
        "token": "YOUR_BOT_TOKEN",
+       "welcome_channel_id": 1234567890123456789
        "twitch_app_credentials": {
             "client_id": "TWITCH_APP_CLIENT_ID",
             "client_secret": "TWITCH_APP_CLIENT_SECRET"
