@@ -100,12 +100,12 @@ class Core(commands.Cog):
         thumbnail_url = member.avatar.url if member.avatar else member.default_avatar.url
 
         embed = discord.Embed(
-            title = f"{member.mention} se ha unido :D",
+            title = f"{member.name} se ha unido :D",
             description = f"🎊 Nos alegra tenerte por aquí! 🎉",
             color = discord.Color.red()
         )
-        embed.add_field(name = "📊 Miembros totales: ", value = f"{member.guild.member_count}", inline = True)
-        embed.add_field(name = "📅 Fecha de unión: ", value = f"<t:{int(member.joined_at.timestamp())}:R>", inline = True)
+        embed.add_field(name = "📊 Miembros totales: ", value = f"{member.guild.member_count}", inline = False)
+        embed.add_field(name = "📅 Fecha de unión: ", value = f"<t:{int(member.joined_at.timestamp())}:R>", inline = False)
         embed.set_thumbnail(url = thumbnail_url)
         embed.set_footer(text = "Espero que disfrutes tu tiempo con nosotros :D")
         embed.timestamp = datetime.now()
