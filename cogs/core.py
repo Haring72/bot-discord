@@ -133,7 +133,7 @@ class Core(commands.Cog):
 
         embed = discord.Embed(
             title = f"Nivel de {member.name}",
-            color = discord.Color.red()
+            color = discord.Color.green()
         )
         embed.add_field(name = "Nivel", value = user_data["level"], inline = True)
         embed.add_field(name = "XP", value = user_data["xp"], inline = True)
