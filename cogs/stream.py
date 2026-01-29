@@ -46,7 +46,7 @@ class StreamCog(commands.Cog):
         embed = discord.Embed(
             title = "Twitch Tracking Correcto",
             description = f"Se notificarán los streams de **{twitch_username}** en {discord_channel.mention}",
-            color = discord.Color.red()
+            color = discord.Color.purple()
         )
         await ctx.send(embed=embed)
 
@@ -143,14 +143,14 @@ class StreamCog(commands.Cog):
         embed = discord.Embed(
             title = f"{stream_data['username'].title()} está ahora mismo en directo!",
             description = f"**{stream_data['title']}**",
-            color = discord.Color.red(),
+            color = discord.Color.purple(),
             url = stream_data['url']
         )
         embed.add_field(name = "Jugando a ", value = stream_data['game'] or "Desconocido", inline = True)
         embed.add_field(name = "Espectadores", value = f"{stream_data['viewer_count']:,}", inline = True)
         embed.set_image(url = stream_data['thumbnail_url'])
 
-        await channel.send(embed=embed)
+        await channel.send(embed = embed)
 
 async def setup(bot):
     await bot.add_cog(StreamCog(bot))
