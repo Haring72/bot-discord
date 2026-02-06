@@ -17,9 +17,10 @@ class AICog(commands.Cog):
             self.model = config['AI_CREDENTIALS']['AI_MODEL']
 
             if not self.model:
-                self.model = 'gemini-1.5-flash'
+                self.model = 'gemini-2.5-flash'
 
             self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}" # Default value for Google API while this is not investigated
+            print("AI configured successfully, !ask command enabled")
         else:
             print("AI_API_KEY not set in config.json, !ask command will be disabled")
             self.api_key = None
