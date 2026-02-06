@@ -9,3 +9,4 @@ idna==3.11
 multidict==6.7.0
 propcache==0.4.1
 yarl==1.22.0
+requests==2.32.5
