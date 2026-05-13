@@ -1,6 +1,5 @@
 import discord
 import os
-import json
 import asyncio
 import requests
 from discord.ext import commands
@@ -9,8 +8,7 @@ class AICog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        with open("config.json", "r", encoding = "utf-8") as f:
-            config = json.load(f)
+        config = self.bot.config
         
         if config.get('AI_CREDENTIALS') and config['AI_CREDENTIALS'].get('AI_API_KEY'):
             self.api_key = config['AI_CREDENTIALS']['AI_API_KEY']
