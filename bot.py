@@ -15,16 +15,40 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+BOT_CONFIG = {
+    "token": "YOUR_BOT_TOKEN",
+
+    "welcome_channel_id": 1234567890123456789,
+
+    "twitch_app_credentials": {
+        "client_id": "TWITCH_APP_CLIENT_ID",
+        "client_secret": "TWITCH_APP_CLIENT_SECRET"
+    },
+
+    "AI_CREDENTIALS": {
+        "AI_API_KEY": "API_KEY_HERE",
+        "AI_MODEL": ""
+    }
+}
+
 def load_config():
+    if not os.path.exists('config.json'):
+        with open('config.json', 'w', encoding='utf-8') as f:
+            json.dump(BOT_CONFIG, f, indent=4)
+        print("config.json file created with default values. Please fill it to continue")
+
     try:
-        with open('config.json') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print("Config.json file can not be found. Please, create one first")
-        exit(1)
+        with open('config.json', 'r', encoding='utf-8') as f:
+            config = json.load(f)
     except json.JSONDecodeError:
-        print("This config.json is not valid, check documentation for more help")
+        print("config.json is invalid. Fix it or delete and run the bot again to regenerate")
         exit(1)
+
+    if not config.get('token'):
+        print("config.json is missing the token")
+        exit(1)
+
+    return config
 
 config = load_config()
 
