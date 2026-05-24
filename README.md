@@ -4,6 +4,7 @@ A simple Discord bot built with discord.py, featuring modular cogs for easy exte
 
 ## Features
 - Custom welcome message embed for new members
+- Conversational AI integration
 - Custom help command
 - Level up function per user
 - Stream tracker (only Twitch at this moment)
@@ -15,11 +16,14 @@ bot.py            # Main bot entry point and setup
 env/              # Virtual environment files (regenerate using requirements.txt for cross-platform compatibility)
 
 cogs/             # Folder for modular bot features (cogs)
+  ai.py           # AI integration settings and command
   core.py         # Core features (may create new files)
   moderation.py   # Moderation commands
   stream.py       # Stream-related commands
   test.py         # Test commands
-config.json       # Bot configuration (token, etc.)
+
+.env              # Bot configuration (token, etc.)
+
 requirements.txt  # Project dependencies for easy virtual environment setup
 
 README.md         # Project documentation (this file)
@@ -74,22 +78,46 @@ However, this is almost a security compromise, because you are allowing scripts 
 4. **Create the bot app** ([This page](https://discordpy.readthedocs.io/en/stable/discord.html) offers all the information you may need about this. Will be updated if needed specific steps)
 
 5. **Configure your bot**
-   - Create a `config.json` file with your bot token (only "token" is the must have, write the others for extented functionality):
-     ```json
-     {
-       "token": "YOUR_BOT_TOKEN",
-       "welcome_channel_id": 1234567890123456789,
-       "twitch_app_credentials": {
-            "client_id": "TWITCH_APP_CLIENT_ID",
-            "client_secret": "TWITCH_APP_CLIENT_SECRET"
-       }
-     }
+   - There is an `.env` file wich you need to fill with your discord bot token and other features you may want to enable. This documentation file will guide you through the setup of every feature. It will look like this:
      ```
+     DISCORD_TOKEN=
+
+     WELCOME_CHANNEL_ID=
+
+     TWITCH_CLIENT_ID=
+     TWITCH_CLIENT_SECRET=
+
+     AI_API_KEY=
+     AI_MODEL=gemini-2.0-flash-exp
+     ```
+
 6. **Run the bot**
    ```powershell
    python bot.py
    ```
-   **On every execution you will need to activate the virtual environment first**, in Linux you can avoid that with the `./start_bot.sh` command, I'm working on a similar script for Windows.
+   **On every execution you will need to activate the virtual environment first**, on Linux you can avoid that with the `./start_bot.sh` command, I'm working on a similar script for Windows.
+
+## Optional features
+This bot has a few optional features that need a bit of setup in the `.env` file to work. I will proceed to explain every one and how to set them up properly.
+1. **Welcome messages**
+   - ID of the text channel you want the bot to use as the "welcome channel", so it can give a message to new members joining the server.
+   ```
+   WELCOME_CHANNEL_ID=1234567890123456789
+   ```
+
+2. **Twitch streams tracker**
+   - You need to create a Twitch app for this to work, this can be made [here](https://dev.twitch.tv/console/apps/create) (URL can be `http://localhost`, in the category you can go for "Application Integration", and the client type will be confidential). After creation, you will have access to ID and secret of the app.
+   ```
+   TWITCH_CLIENT_ID=12345
+   TWITCH_CLIENT_SECRET=12345
+   ```
+
+3. **AI Integration**
+   - At this moment, only Gemini is available, so you need to go to [Google AI Studio](https://aistudio.google.com/api-keys) for API key creation (IMPORTANT: Create a new project in the same webpage or use the Default Gemini Project), you can also set up the AI model, but as a default value it will use gemini-2.0-flash, so leave the model empty if you don't know about what to write there.
+   ```
+   AI_API_KEY=12345
+   AI_MODEL=gemini-2.0-flash-exp
+   ```
 
 ## Aditional documentation
 Code writen using this sites
@@ -101,4 +129,4 @@ Code writen using this sites
 This project is for educational purposes.
 
 ## Disclaimer
-AI was only used for repetitive tasks (writing plain text and certain function outputs that includes text) and for some ideas about what this bot must have
+AI was only used for repetitive tasks (writing plain text and certain function outputs that includes text), some ideas about what this bot must have and code refactor. For any problem regarding setup issues and bot not working properly, please post in the [issues](https://github.com/Haring72/bot-discord/issues) page in this project.

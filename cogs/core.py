@@ -13,10 +13,6 @@ XP_PER_LEVEL = 100
 
 
 
-def load_config():
-    with open('config.json', 'r') as f:
-        return json.load(f)
-
 class XPManager:
     def __init__(self, xp_file: str = XP_FILE):
         self.xp_file = xp_file
@@ -84,7 +80,7 @@ class Core(commands.Cog):
     
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        config = load_config()
+        config = self.bot.config
         welcome_channel_id = config.get("welcome_channel_id")
 
         if not welcome_channel_id:

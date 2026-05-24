@@ -1,21 +1,16 @@
 import discord
 import aiohttp
-import json
 from discord.ext import commands, tasks
 from datetime import datetime
 
 class StreamCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.config = self.load_config()
+        self.config = bot.config
         self.twitch_token = None
         self.channels = {}
         self.stream_states = {}
         self.check_twitch_streams.start()
-
-    def load_config(self):
-        with open('config.json', 'r') as f:
-            return json.load(f)
 
     def cog_unload(self):
         self.check_twitch_streams.cancel()
