@@ -1,6 +1,5 @@
 import discord
 import os
-import json
 import asyncio
 import requests
 from discord.ext import commands
@@ -9,8 +8,7 @@ class AICog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        with open("config.json", "r", encoding = "utf-8") as f:
-            config = json.load(f)
+        config = self.bot.config
         
         if config.get('AI_CREDENTIALS') and config['AI_CREDENTIALS'].get('AI_API_KEY'):
             self.api_key = config['AI_CREDENTIALS']['AI_API_KEY']
@@ -22,7 +20,7 @@ class AICog(commands.Cog):
             self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}" # Default value for Google API while this is not investigated
             print("AI configured successfully, !ask command enabled")
         else:
-            print("AI_API_KEY not set in config.json, !ask command will be disabled")
+            print("AI_API_KEY not set in .env file, !ask command will be disabled")
             self.api_key = None
             self.model = None
             self.api_url = None
