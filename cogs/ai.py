@@ -20,7 +20,7 @@ class AICog(commands.Cog):
             self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}" # Default value for Google API while this is not investigated
             print("AI configured successfully, !ask command enabled")
         else:
-            print("AI_API_KEY not set in config.json, !ask command will be disabled")
+            print("AI_API_KEY not set in .env file, !ask command will be disabled")
             self.api_key = None
             self.model = None
             self.api_url = None

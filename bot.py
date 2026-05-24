@@ -78,6 +78,7 @@ intents.guild_messages = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
+bot.config = config
 
 async def load_cogs():
     for filename in os.listdir('./cogs'):
