@@ -125,5 +125,8 @@ Code writen using this sites
 - [Python tutorials for more specific information](https://www.w3schools.com/python/default.asp)
 - [Discord.py documentation](https://discordpy.readthedocs.io/en/stable/index.html)
 
+## License
+Licensed under the MIT License — see the LICENSE file.
+
 ## Disclaimer
 AI was only used for repetitive tasks (writing plain text and certain function outputs that includes text), some ideas about what this bot must have, code refactor and some text on this file. For any problem regarding setup issues and bot not working properly, please post in the [issues](https://github.com/Haring72/bot-discord/issues) page in this project.
