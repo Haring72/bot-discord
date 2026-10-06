@@ -17,9 +17,10 @@ WELCOME_CHANNEL_ID=
 # Below this, everything is optional to fill
 
 
-# Twitch stream tracker integration
+# Twitch & YouTube stream tracker integration
 TWITCH_CLIENT_ID=
 TWITCH_CLIENT_SECRET=
+YOUTUBE_API_KEY=
 
 # AI Integration
 AI_API_KEY=
@@ -66,6 +67,7 @@ def get_config_from_env():
             "client_id": os.getenv("TWITCH_CLIENT_ID", "").strip(),
             "client_secret": os.getenv("TWITCH_CLIENT_SECRET", "").strip(),
         },
+        "youtube_api_key": os.getenv("YOUTUBE_API_KEY"),
         "AI_CREDENTIALS": {
             "AI_API_KEY": os.getenv("AI_API_KEY", "").strip(),
             "AI_MODEL": os.getenv("AI_MODEL", "").strip() or "gemini-2.0-flash-exp",
@@ -106,4 +108,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
