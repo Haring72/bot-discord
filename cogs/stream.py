@@ -1,6 +1,14 @@
+import re
+
 import aiohttp
 import discord
 from discord.ext import commands, tasks
+
+YOUTUBE_API = "https://www.googleapis.com/youtube/v3"
+
+
+class YouTubeAPIError(Exception):
+    """Error al consultar la API de YouTube"""
 
 
 class StreamCog(commands.Cog):
@@ -10,10 +18,14 @@ class StreamCog(commands.Cog):
         self.twitch_token = None
         self.channels = {}
         self.stream_states = {}
+        self.youtube_channels = {}
+        self.youtube_states = {}
         self.check_twitch_streams.start()
+        self.check_youtube_streams.start()
 
     def cog_unload(self):
         self.check_twitch_streams.cancel()
+        self.check_youtube_streams.cancel()
 
     @commands.command(
         name="twitch-track",
@@ -174,6 +186,206 @@ class StreamCog(commands.Cog):
         embed.set_image(url=stream_data["thumbnail_url"])
 
         await channel.send(embed=embed)
+
+    @commands.command(
+        name="youtube-track",
+        help="Track a YouTube channel's live streams",
+        usage="!youtube-track <@handle | URL | channel_id> #[discord_text_channel]",
+    )
+    @commands.has_permissions(manage_guild=True)
+    async def track_youtube(
+        self, ctx, youtube_channel: str, discord_channel: discord.TextChannel = None
+    ):
+        try:
+            async with aiohttp.ClientSession() as session:
+                info = await self.resolve_youtube_channel(session, youtube_channel)
+        except YouTubeAPIError as e:
+            print(f"[YouTube] Error al verificar canal: {e}")
+            embed = discord.Embed(
+                title="Error con la API de YouTube",
+                description="No se ha podido consultar YouTube ahora mismo. Inténtalo de nuevo más tarde",
+                color=discord.Color.red(),
+            )
+            await ctx.send(embed=embed)
+            return
+
+        if info is None:
+            embed = discord.Embed(
+                title="Canal no encontrado / Canal no válido",
+                description=f"No se ha encontrado el canal **{youtube_channel}** en YouTube. Verifica que el handle (@usuario), la URL del canal o ID estén correctamente escritos o, si crees que es un error, contacta con un administrador",
+                color=discord.Color.red(),
+            )
+            await ctx.send(embed=embed)
+            return
+
+        if discord_channel is None:
+            discord_channel = ctx.channel
+
+        self.youtube_channels.setdefault(ctx.guild.id, {})[discord_channel.id] = info
+        self.youtube_states[(ctx.guild.id, discord_channel.id)] = None
+
+        embed = discord.Embed(
+            title="YouTube Tracking Correcto",
+            description=f"Se notificarán los directos de **{info['name']}** en {discord_channel.mention}",
+            color=discord.Color.red(),
+        )
+        await ctx.send(embed=embed)
+
+    @tasks.loop(minutes=10)
+    async def check_youtube_streams(self):
+        async with aiohttp.ClientSession() as session:
+            for guild_id, channels in self.youtube_channels.items():
+                guild = self.bot.get_guild(guild_id)
+
+                if not guild:
+                    continue
+
+                for channel_id, yt_info in channels.items():
+                    channel = guild.get_channel(channel_id)
+                    if not channel:
+                        continue
+
+                    state_key = (guild_id, channel_id)
+
+                    try:
+                        live = await self.check_youtube_live(session, yt_info)
+                    except YouTubeAPIError as e:
+                        print(f"[YouTube] Error comprobando {yt_info['name']}: {e}")
+                        continue
+
+                    last_notified = self.youtube_states.get(state_key)
+
+                    if live and live["video_id"] != last_notified:
+                        await self.send_youtube_notification(channel, live)
+                        self.youtube_states[state_key] = live["video_id"]
+                    elif not live and last_notified is not None:
+                        self.youtube_states[state_key] = None
+
+    @check_youtube_streams.before_loop
+    async def before_check_youtube_streams(self):
+        await self.bot.wait_until_ready()
+
+    @check_youtube_streams.error
+    async def on_youtube_loop_error(self, error):
+        print(f"[YouTube] Error en el loop: {error!r}")
+        if not self.check_youtube_streams.is_running():
+            self.check_youtube_streams.restart()
+
+    async def _youtube_get(self, session, endpoint, params):
+        api_key = (self.config or {}).get("YOUTUBE_API_KEY")
+        if not api_key:
+            raise YouTubeAPIError(
+                "Falta 'YOUTUBE_API_KEY' en el archivo de configuración (.env)"
+            )
+
+        params = {**params, "key": api_key}
+        try:
+            async with session.get(f"{YOUTUBE_API}/{endpoint}", params=params) as resp:
+                data = await resp.json()
+                if resp.status != 200:
+                    reason = data.get("error", {}).get("message", "sin detalle")
+                    raise YouTubeAPIError(f"HTTP {resp.status}: {reason}")
+                return data
+        except aiohttp.ClientError as e:
+            raise YouTubeAPIError(str(e)) from e
+
+    async def resolve_youtube_channel(self, session, query):
+        query = query.strip()
+
+        match = re.search(r"youtube\.com/channel/(UC[\w-]{22})", query)
+        if match:
+            params = {"id": match.group(1)}
+        elif re.fullmatch(r"UC[\w-]{22}", query):
+            params = {"id": query}
+        else:
+            match = re.search(r"youtube\.com/(@[\w.\-]+)", query)
+            handle = match.group(1) if match else query
+            if not handle.startswith("@"):
+                handle = f"@{handle}"
+            params = {"forHandle": handle}
+
+        data = await self._youtube_get(
+            session, "channels", {**params, "part": "snippet,contentDetails"}
+        )
+        items = data.get("items")
+        if not items:
+            return None
+
+        item = items[0]
+        return {
+            "id": item["id"],
+            "name": item["snippet"]["title"],
+            "uploads": item["contentDetails"]["relatedPlaylists"]["uploads"],
+        }
+
+        async def check_youtube_live(self, session, yt_info):
+            playlist = await self._youtube_get(
+                session,
+                "playlistItems",
+                {
+                    "part": "contentDetails",
+                    "playlistId": yt_info["uploads"],
+                    "maxResults": 5,
+                },
+            )
+            video_ids = [
+                i["contentDetails"]["videoId"] for i in playlist.get("items", [])
+            ]
+            if not video_ids:
+                return None
+
+            videos = await self._youtube_get(
+                session,
+                "videos",
+                {
+                    "part": "snippet,liveStreamingDetails",
+                    "id": ",".join(video_ids),
+                },
+            )
+
+            for video in videos.get("items", []):
+                snippet = video["snippet"]
+                if snippet.get("liveBroadcastContent") != "live":
+                    continue
+
+                details = video.get("liveStreamingDetails", {})
+                thumbs = snippet.get("thumbnails", {})
+                thumb = (
+                    thumbs.get("high")
+                    or thumbs.get("medium")
+                    or thumbs.get("default")
+                    or {}
+                )
+                viewers = details.get("concurrentViewers")
+
+                return {
+                    "video_id": video["id"],
+                    "channel_name": yt_info["name"],
+                    "title": snippet["title"],
+                    "viewer_count": int(viewers) if viewers is not None else None,
+                    "thumbnail_url": thumb.get("url"),
+                    "url": f"https://www.youtube.com/watch?v={video['id']}",
+                }
+
+            return None
+
+        async def send_youtube_notification(self, channel, stream_data):
+            embed = discord.Embed(
+                title=f"{stream_data['channel_name']} está ahora mismo en directo :D",
+                description=f"**{stream_data['title']}**",
+                color=discord.Color.red(),
+                url=stream_data["url"],
+            )
+            if stream_data["viewer_count"] is not None:
+                embed.add_field(
+                    name="Espectadores",
+                    value=f"{stream_data['viewer_count']:,}",
+                    inline=True,
+                )
+            if stream_data["thumbnail_url"]:
+                embed.set_image(url=stream_data["thumbnail_url"])
+
+            await channel.send(embed=embed)
 
 
 async def setup(bot):
