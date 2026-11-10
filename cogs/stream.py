@@ -318,74 +318,72 @@ class StreamCog(commands.Cog):
             "uploads": item["contentDetails"]["relatedPlaylists"]["uploads"],
         }
 
-        async def check_youtube_live(self, session, yt_info):
-            playlist = await self._youtube_get(
-                session,
-                "playlistItems",
-                {
-                    "part": "contentDetails",
-                    "playlistId": yt_info["uploads"],
-                    "maxResults": 5,
-                },
-            )
-            video_ids = [
-                i["contentDetails"]["videoId"] for i in playlist.get("items", [])
-            ]
-            if not video_ids:
-                return None
-
-            videos = await self._youtube_get(
-                session,
-                "videos",
-                {
-                    "part": "snippet,liveStreamingDetails",
-                    "id": ",".join(video_ids),
-                },
-            )
-
-            for video in videos.get("items", []):
-                snippet = video["snippet"]
-                if snippet.get("liveBroadcastContent") != "live":
-                    continue
-
-                details = video.get("liveStreamingDetails", {})
-                thumbs = snippet.get("thumbnails", {})
-                thumb = (
-                    thumbs.get("high")
-                    or thumbs.get("medium")
-                    or thumbs.get("default")
-                    or {}
-                )
-                viewers = details.get("concurrentViewers")
-
-                return {
-                    "video_id": video["id"],
-                    "channel_name": yt_info["name"],
-                    "title": snippet["title"],
-                    "viewer_count": int(viewers) if viewers is not None else None,
-                    "thumbnail_url": thumb.get("url"),
-                    "url": f"https://www.youtube.com/watch?v={video['id']}",
-                }
-
+    async def check_youtube_live(self, session, yt_info):
+        playlist = await self._youtube_get(
+            session,
+            "playlistItems",
+            {
+                "part": "contentDetails",
+                "playlistId": yt_info["uploads"],
+                "maxResults": 5,
+            },
+        )
+        video_ids = [i["contentDetails"]["videoId"] for i in playlist.get("items", [])]
+        if not video_ids:
             return None
 
-        async def send_youtube_notification(self, channel, stream_data):
-            embed = discord.Embed(
-                title=f"{stream_data['channel_name']} está ahora mismo en directo :D",
-                description=f"**{stream_data['title']}**",
-                color=discord.Color.red(),
-                url=stream_data["url"],
-            )
-            if stream_data["viewer_count"] is not None:
-                embed.add_field(
-                    name="Espectadores",
-                    value=f"{stream_data['viewer_count']:,}",
-                    inline=True,
-                )
-            if stream_data["thumbnail_url"]:
-                embed.set_image(url=stream_data["thumbnail_url"])
+        videos = await self._youtube_get(
+            session,
+            "videos",
+            {
+                "part": "snippet,liveStreamingDetails",
+                "id": ",".join(video_ids),
+            },
+        )
 
-            await channel.send(embed=embed)
+        for video in videos.get("items", []):
+            snippet = video["snippet"]
+            if snippet.get("liveBroadcastContent") != "live":
+                continue
+
+            details = video.get("liveStreamingDetails", {})
+            thumbs = snippet.get("thumbnails", {})
+            thumb = (
+                thumbs.get("high")
+                or thumbs.get("medium")
+                or thumbs.get("default")
+                or {}
+            )
+            viewers = details.get("concurrentViewers")
+
+            return {
+                "video_id": video["id"],
+                "channel_name": yt_info["name"],
+                "title": snippet["title"],
+                "viewer_count": int(viewers) if viewers is not None else None,
+                "thumbnail_url": thumb.get("url"),
+                "url": f"https://www.youtube.com/watch?v={video['id']}",
+            }
+
+        return None
+
+    async def send_youtube_notification(self, channel, stream_data):
+        embed = discord.Embed(
+            title=f"{stream_data['channel_name']} está ahora mismo en directo :D",
+            description=f"**{stream_data['title']}**",
+            color=discord.Color.red(),
+            url=stream_data["url"],
+        )
+        if stream_data["viewer_count"] is not None:
+            embed.add_field(
+                name="Espectadores",
+                value=f"{stream_data['viewer_count']:,}",
+                inline=True,
+            )
+        if stream_data["thumbnail_url"]:
+            embed.set_image(url=stream_data["thumbnail_url"])
+
+        await channel.send(embed=embed)
 
 
 async def setup(bot):
