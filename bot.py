@@ -66,6 +66,7 @@ def get_config_from_env():
             "client_id": os.getenv("TWITCH_CLIENT_ID", "").strip(),
             "client_secret": os.getenv("TWITCH_CLIENT_SECRET", "").strip(),
         },
+        "YOUTUBE_API_KEY": os.getenv("YOUTUBE_API_KEY", "").strip(),
         "AI_CREDENTIALS": {
             "AI_API_KEY": os.getenv("AI_API_KEY", "").strip(),
             "AI_MODEL": os.getenv("AI_MODEL", "").strip() or "gemini-2.0-flash-exp",
@@ -106,4 +107,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
